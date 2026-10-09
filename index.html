@@ -66,6 +66,59 @@ textarea{resize:vertical;min-height:70px}
 .login h1{margin:0;font-size:22px}
 .login p{margin:0;color:var(--muted);max-width:340px}
 .login .btn{flex:none;padding:13px 22px}
+/* barra de vistes */
+.vbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 61px);z-index:4;background:var(--bg);padding:8px 14px 6px;border-bottom:1px solid var(--line)}
+.seg{display:flex;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;padding:7px 4px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.nav{display:flex;align-items:center;gap:8px;margin-top:8px}
+.nav .ttl{flex:1;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav button{border:1px solid var(--line);background:var(--card);border-radius:8px;min-width:38px;height:34px;font-size:15px}
+.nav .td{padding:0 10px;font-size:13px;font-weight:600}
+.due{display:block;width:100%;text-align:left;border:1px solid #e0b100;background:#fbe9a6;color:#3b2f00;border-radius:10px;padding:9px 12px;margin:10px 0 0;font-weight:600;font-size:14px}
+@media (prefers-color-scheme:dark){.due{background:#4a3c08;color:#ffe08a;border-color:#7a6410}}
+.ms{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px;align-items:center;font-size:12px;color:var(--muted)}
+.mc{font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:#f6dc8a;color:#3b2f00;white-space:nowrap}
+.mc.ok{background:var(--chip);color:var(--ok)}
+@media (prefers-color-scheme:dark){.mc{background:#5a4a12;color:#ffe08a}}
+/* xips de notes dins les vistes */
+.ch{display:block;width:100%;text-align:left;border:0;border-left:4px solid var(--org);background:var(--chip);border-radius:7px;padding:6px 8px;margin:4px 0;font-size:14px;line-height:1.3}
+.ch .h{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--muted);margin-right:5px}
+.ch .p{display:block;font-size:12px;color:var(--muted)}
+.ch.noal{border-left-color:var(--line)}
+.ch.late{border-left-color:var(--late);background:color-mix(in srgb,var(--late) 14%,var(--chip))}
+.ch.done{border-left-color:var(--line);opacity:.55;text-decoration:line-through}
+/* dia */
+.dr{display:flex;border-bottom:1px solid var(--line);min-height:46px}
+.dr .hh{width:54px;flex:none;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--muted);padding:8px 0}
+.dr .cc{flex:1;min-width:0;padding:3px 0}
+.dr.now .hh{color:var(--org);font-weight:700}
+.dr.all .hh{font-family:inherit;font-size:11px;line-height:1.2;padding-top:6px}
+/* setmana */
+.wd{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}
+.wd.today{border-color:var(--acc)}
+.wd .wh{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:8px 12px;font-weight:700}
+.wd.we .wh{color:var(--muted)}
+.wd .wb{padding:0 10px 8px;min-height:30px}
+.wd .add{color:var(--muted);font-size:13px;padding:2px 2px 4px}
+/* mes */
+.mg{display:grid;grid-template-columns:26px repeat(7,1fr);gap:3px;margin-top:10px}
+.mg .hd{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding:2px 0}
+.mg .wn{font-size:10px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;gap:3px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.mg .wn i{font-style:normal;width:8px;height:8px;border-radius:2px;background:#e0b100}
+.mg .cl{aspect-ratio:1/1.15;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:14px}
+.mg .cl.out{opacity:.4}
+.mg .cl.we{background:var(--bg)}
+.mg .cl.today{border-color:var(--acc);border-width:2px}
+.mg .cl.today b{color:var(--acc)}
+.mg .dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.mg .dots i{width:7px;height:7px;border-radius:50%;background:var(--org)}
+.mg .dots i.n{background:var(--muted)}
+.mg .dots i.l{background:var(--late)}
+.mg .dots i.d{background:var(--line)}
+.mg .more{font-size:10px;color:var(--muted)}
+.leg{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:14px}
+.leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);transform:translateX(-50%);background:#14202e;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30;max-width:90vw;box-shadow:var(--shadow)}
 </style>
 </head>
@@ -97,6 +150,13 @@ const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.get
 const daysFrom = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? Math.round((new Date(s + 'T12:00:00') - new Date(todayStr() + 'T12:00:00')) / 864e5) : null;
 const nowIso = () => new Date().toISOString();
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const DAYS = ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'];
+const MESOS = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
+const WEEK_RE = /^\d{4}-W\d{2}$/;
+function dateToWeek(s) { const d = new Date(s + 'T12:00:00'); const t = new Date(d); t.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7)); const y = t.getFullYear(); const j4 = new Date(y, 0, 4); const n = 1 + Math.round(((t - j4) / 864e5 - 3 + ((j4.getDay() + 6) % 7)) / 7); return `${y}-W${pad(n)}`; }
+function weekMon(w) { const y = +w.slice(0, 4), n = +w.slice(6); const j4 = new Date(y, 0, 4), dow = (j4.getDay() + 6) % 7; return dstr(new Date(y, 0, 4 - dow + (n - 1) * 7)); }
+const cap = t => t ? t[0].toUpperCase() + t.slice(1) : t;
+const fmtDM = s => `${s.slice(8)}/${s.slice(5, 7)}`;
 const fmtDay = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' }); };
 const fmtShort = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' }); };
 let toastT = null;
@@ -173,6 +233,7 @@ const S = {
   projects: LS.get('projects', []),
   lastSync: LS.get('lastSync', null),
   showDone: false, busy: false, error: '', user: LS.get('user', ''),
+  view: LS.get('view', 'llista'), date: todayStr(),
 };
 const save = () => { LS.set('notes', S.notes); LS.set('outbox', S.outbox); LS.set('projects', S.projects); LS.set('lastSync', S.lastSync); };
 const agendaPath = id => `/me/drive/root:/${encPath(S.folder + '/Agenda/' + id + '.json')}:`;
@@ -250,40 +311,120 @@ function itemHtml(id, n) {
   return `<div class="it${late ? ' late' : ''}${done ? ' done' : ''}" data-id="${esc(id)}"><button class="ck" data-ck="${esc(id)}" aria-label="${done ? 'Tornar a pendent' : 'Marcar com a revisada'}">${done ? '✓' : ''}</button>
     <div class="bd" data-ed="${esc(id)}"><div class="tt">${esc(n.titol || '(sense text)')}</div>${meta ? `<div class="mt">${meta}</div>` : ''}${pend ? '<div class="pend">● pendent d’enviar</div>' : ''}</div></div>`;
 }
-function render() {
-  if (!LS.get('tok', null)) return showLogin();
-  const list = Object.entries(S.notes).map(([id, x]) => [id, x.d]);
+function msByWeek() {
+  const m = {};
+  for (const p of S.projects) for (const k of ['fat', 'sat']) { const h = p[k]; if (h && WEEK_RE.test(h.f || '')) (m[h.f] ||= []).push({ k: k.toUpperCase(), p, ok: h.ok }); }
+  return m;
+}
+const msHtml = (ms, w) => (ms[w] || []).map(x => `<span class="mc ${x.ok ? 'ok' : ''}">${x.k}${x.ok ? ' ✓' : ''} · ${esc(x.p.cliente || x.p.numero || '')}</span>`).join('');
+function chip(id, n, showProj = true) {
+  const late = isLate(n), done = n.estat === 'revisada', pj = projName(n.proyecto);
+  return `<button class="ch ${done ? 'done' : late ? 'late' : n.alarma ? '' : 'noal'}" data-ed="${esc(id)}">${n.alarma && !done ? '⏰ ' : ''}${n.hora ? `<span class="h">${esc(n.hora)}</span>` : ''}${esc(n.titol || '(sense text)')}${showProj && pj ? `<span class="p">${esc(pj)}</span>` : ''}</button>`;
+}
+function listView(list) {
   const pendents = list.filter(([, n]) => n.estat !== 'revisada');
   const sortK = ([, n]) => (n.data || '9999') + ' ' + (n.hora || '99:99');
   pendents.sort((a, b) => sortK(a).localeCompare(sortK(b)));
   const today = todayStr(), groups = [];
   const late = pendents.filter(([, n]) => isLate(n));
   if (late.length) groups.push(['late', 'Endarrerides', late]);
-  const rest = pendents.filter(([, n]) => !isLate(n));
   const byDay = new Map();
-  for (const e of rest) { const d = e[1].data || ''; if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(e); }
+  for (const e of pendents.filter(([, n]) => !isLate(n))) { const d = e[1].data || ''; if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(e); }
   for (const [d, l] of byDay) groups.push(['', d === today ? 'Avui' : d === addDays(today, 1) ? 'Demà' : d ? fmtDay(d) : 'Sense data', l]);
-  let html = '';
-  if (S.error === 'folder') html += `<div class="bar err">No trobo la carpeta de dades a OneDrive. Obre el programa PM Compass a l’ordinador (crea un fitxer que m’ajuda a trobar-la) i torna-ho a provar en uns minuts, o escriu la ruta a ⚙.</div>`;
-  else if (S.error) html += `<div class="bar err">${esc(S.error)}</div>`;
-  if (S.outbox.length && !S.busy) html += `<div class="bar">${S.outbox.length} canvi${S.outbox.length === 1 ? '' : 's'} pendent${S.outbox.length === 1 ? '' : 's'} d’enviar a OneDrive.</div>`;
-  html += groups.length ? groups.map(([c, t, l]) => `<div class="grp ${c}">${esc(t)} · ${l.length}</div>${l.map(([id, n]) => itemHtml(id, n)).join('')}`).join('')
+  let html = groups.length ? groups.map(([c, t, l]) => `<div class="grp ${c}">${esc(t)} · ${l.length}</div>${l.map(([id, n]) => itemHtml(id, n)).join('')}`).join('')
     : (S.busy && !S.lastSync ? '<div class="empty">Carregant l’agenda…</div>' : '<div class="empty">No tens res pendent a l’agenda.<br>Prem + per afegir-hi una nota.</div>');
   const done = list.filter(([, n]) => n.estat === 'revisada').sort((a, b) => String(b[1].revisada || b[1].actualitzat || '').localeCompare(String(a[1].revisada || a[1].actualitzat || '')));
   if (done.length) {
     html += `<button class="tog" id="tgDone">${S.showDone ? 'Amagar les revisades' : `Veure les revisades (${done.length})`}</button>`;
     if (S.showDone) html += `<div class="grp">Revisades</div>${done.slice(0, 40).map(([id, n]) => itemHtml(id, n)).join('')}`;
   }
+  return html;
+}
+function dayView(byDay, d, ms) {
+  const l = byDay[d] || [], noH = l.filter(([, n]) => !n.hora), withH = l.filter(([, n]) => n.hora);
+  const hs = withH.map(([, n]) => +n.hora.slice(0, 2)); const h0 = Math.min(7, ...hs), h1 = Math.max(20, ...hs);
+  const now = new Date(), isToday = d === todayStr(), wk = dateToWeek(d);
+  let h = ms[wk] ? `<div class="ms">Aquesta setmana: ${msHtml(ms, wk)}</div>` : '';
+  h += `<div class="dr all"><div class="hh">Tot el dia</div><div class="cc" data-new="${d}">${noH.map(([id, n]) => chip(id, n)).join('')}</div></div>`;
+  for (let x = h0; x <= h1; x++) {
+    const hh = pad(x), it = withH.filter(([, n]) => +n.hora.slice(0, 2) === x);
+    h += `<div class="dr ${isToday && now.getHours() === x ? 'now' : ''}"><div class="hh">${hh}:00</div><div class="cc" data-new="${d}" data-h="${hh}:00">${it.map(([id, n]) => chip(id, n)).join('')}</div></div>`;
+  }
+  return h;
+}
+function weekView(byDay, d, ms) {
+  const wk = dateToWeek(d), mon = weekMon(wk), today = todayStr();
+  let h = ms[wk] ? `<div class="ms">Aquesta setmana: ${msHtml(ms, wk)}</div>` : '';
+  for (let i = 0; i < 7; i++) {
+    const x = addDays(mon, i), l = byDay[x] || [];
+    const nm = cap(new Date(x + 'T12:00:00').toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric' }));
+    h += `<div class="wd ${x === today ? 'today' : ''} ${i >= 5 ? 'we' : ''}"><button class="wh" data-day="${x}"><span>${esc(nm)}${x === today ? ' · avui' : ''}</span><span>›</span></button>
+      <div class="wb" data-new="${x}">${l.length ? l.map(([id, n]) => chip(id, n)).join('') : '<div class="add">＋ Toca per afegir</div>'}</div></div>`;
+  }
+  return h;
+}
+function monthView(byDay, d, ms) {
+  const [y, m] = d.split('-').map(Number), first = dstr(new Date(y, m - 1, 1)), last = dstr(new Date(y, m, 0)), today = todayStr();
+  let w = weekMon(dateToWeek(first)), h = '<div class="mg"><span class="hd"></span>' + DAYS.map(x => `<span class="hd">${x}</span>`).join('');
+  while (w <= last) {
+    const wk = dateToWeek(w), hasMs = (ms[wk] || []).length;
+    h += `<span class="wn">S${+wk.slice(6)}${hasMs ? '<i title="FAT/SAT"></i>' : ''}</span>`;
+    for (let i = 0; i < 7; i++) {
+      const x = addDays(w, i), l = byDay[x] || [], out = +x.slice(5, 7) !== m;
+      const dots = l.slice(0, 6).map(([, n]) => `<i class="${n.estat === 'revisada' ? 'd' : isLate(n) ? 'l' : n.alarma ? '' : 'n'}"></i>`).join('');
+      h += `<button class="cl ${out ? 'out' : ''} ${i >= 5 ? 'we' : ''} ${x === today ? 'today' : ''}" data-day="${x}"><b>${+x.slice(8)}</b><span class="dots">${dots}</span>${l.length > 6 ? `<span class="more">+${l.length - 6}</span>` : ''}</button>`;
+    }
+    w = addDays(w, 7);
+  }
+  h += '</div>';
+  const mws = Object.keys(ms).filter(k => { const mo = weekMon(k); return mo <= last && addDays(mo, 6) >= first; }).sort();
+  if (mws.length) h += `<div class="grp">FAT / SAT del mes</div>` + mws.map(k => `<div class="ms"><b style="min-width:34px">S${+k.slice(6)}</b>${msHtml(ms, k)}</div>`).join('');
+  h += `<div class="leg"><span><i style="background:var(--org)"></i>alarma</span><span><i style="background:var(--muted)"></i>nota</span><span><i style="background:var(--late)"></i>vençuda</span><span><i style="background:var(--line)"></i>revisada</span><span><i style="background:#e0b100;border-radius:2px"></i>FAT/SAT</span></div>`;
+  return h;
+}
+function render() {
+  if (!LS.get('tok', null)) return showLogin();
+  const list = Object.entries(S.notes).map(([id, x]) => [id, x.d]);
+  const v = S.view, d = S.date, ms = msByWeek();
+  const byDay = {}; list.forEach(e => { if (e[1].data) (byDay[e[1].data] ||= []).push(e); });
+  Object.values(byDay).forEach(l => l.sort((a, b) => String(a[1].hora || '').localeCompare(String(b[1].hora || ''))));
+  let html = '';
+  if (S.error === 'folder') html += `<div class="bar err">No trobo la carpeta de dades a OneDrive. Obre el programa PM Compass a l’ordinador (crea un fitxer que m’ajuda a trobar-la) i torna-ho a provar en uns minuts, o escriu la ruta a ⚙.</div>`;
+  else if (S.error) html += `<div class="bar err">${esc(S.error)}</div>`;
+  if (S.outbox.length && !S.busy) html += `<div class="bar">${S.outbox.length} canvi${S.outbox.length === 1 ? '' : 's'} pendent${S.outbox.length === 1 ? '' : 's'} d’enviar a OneDrive.</div>`;
+  const due = list.filter(([, n]) => n.alarma && isLate(n)).length;
+  if (due && v !== 'llista') html += `<button class="due" id="bDue">🔔 Tens ${due} alarm${due === 1 ? 'a' : 'es'} per revisar · Veure-les</button>`;
+  let title = '';
+  if (v === 'llista') html += listView(list);
+  else if (v === 'dia') { title = cap(new Date(d + 'T12:00:00').toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })); html += dayView(byDay, d, ms); }
+  else if (v === 'setmana') { const wk = dateToWeek(d), mon = weekMon(wk); title = `Setmana ${+wk.slice(6)} · ${fmtDM(mon)} – ${fmtDM(addDays(mon, 6))}`; html += weekView(byDay, d, ms); }
+  else { const [y, m] = d.split('-').map(Number); title = `${cap(MESOS[m - 1])} ${y}`; html += monthView(byDay, d, ms); }
   const sub = S.busy ? 'Sincronitzant…' : S.lastSync ? 'Actualitzat ' + new Date(S.lastSync).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+  const views = [['llista', 'Pendents'], ['dia', 'Dia'], ['setmana', 'Setmana'], ['mes', 'Mes']];
   $('#app').innerHTML = `<header><img src="icon-192.png" alt=""><div class="t"><h1>Agenda</h1><div class="s">${esc(sub)}</div></div>
     <button class="ib${S.busy ? ' spin' : ''}" id="bSync" aria-label="Actualitzar"><span>⟳</span></button><button class="ib" id="bCfg" aria-label="Configuració">⚙</button></header>
+    <div class="vbar"><div class="seg">${views.map(([k, l]) => `<button data-view="${k}" aria-pressed="${v === k}">${l}</button>`).join('')}</div>
+      ${v !== 'llista' ? `<div class="nav"><button data-nav="-1" aria-label="Anterior">‹</button><div class="ttl">${esc(title)}</div><button class="td" data-nav="0">Avui</button><button data-nav="1" aria-label="Següent">›</button></div>` : ''}</div>
     <main>${html}</main><button class="fab" id="bAdd" aria-label="Nova nota">+</button>`;
   $('#bSync').onclick = () => sync();
   $('#bCfg').onclick = cfgSheet;
-  $('#bAdd').onclick = () => noteSheet(null);
+  $('#bAdd').onclick = () => noteSheet(null, { data: v === 'llista' ? todayStr() : (v === 'dia' ? d : (d >= todayStr() ? d : todayStr())) });
   const tg = $('#tgDone'); if (tg) tg.onclick = () => { S.showDone = !S.showDone; render(); };
+  const bd = $('#bDue'); if (bd) bd.onclick = () => setView('llista');
+  document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+  document.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => navDate(+b.dataset.nav));
+  document.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { S.date = b.dataset.day; setView('dia'); });
   document.querySelectorAll('[data-ck]').forEach(b => b.onclick = e => { e.stopPropagation(); toggleDone(b.dataset.ck); });
-  document.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => noteSheet(b.dataset.ed));
+  document.querySelectorAll('[data-ed]').forEach(b => b.onclick = e => { e.stopPropagation(); noteSheet(b.dataset.ed); });
+  document.querySelectorAll('[data-new]').forEach(b => b.onclick = () => noteSheet(null, { data: b.dataset.new, hora: b.dataset.h || '' }));
+}
+function setView(v) { S.view = v; LS.set('view', v); render(); window.scrollTo(0, 0); }
+function navDate(dir) {
+  if (!dir) S.date = todayStr();
+  else if (S.view === 'dia') S.date = addDays(S.date, dir);
+  else if (S.view === 'setmana') S.date = addDays(S.date, 7 * dir);
+  else { const [y, m] = S.date.split('-').map(Number); S.date = dstr(new Date(y, m - 1 + dir, 1)); }
+  render(); window.scrollTo(0, 0);
 }
 function toggleDone(id) {
   const n = S.notes[id]?.d; if (!n) return;
@@ -298,9 +439,9 @@ function openSheet(html) { $('#pane').innerHTML = html; $('#sheet').hidden = fal
 function closeSheet() { $('#sheet').hidden = true; $('#pane').innerHTML = ''; }
 $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
 function nextMonday(s) { const d = new Date(s + 'T12:00:00'); const k = (8 - d.getDay()) % 7 || 7; return addDays(s, k); }
-function noteSheet(id) {
+function noteSheet(id, pre = {}) {
   const ex = id ? S.notes[id]?.d : null;
-  const v = ex ? { ...ex } : { titol: '', detall: '', data: todayStr(), hora: '', alarma: true, proyecto: '' };
+  const v = ex ? { ...ex } : { titol: '', detall: '', data: pre.data || todayStr(), hora: pre.hora || '', alarma: true, proyecto: '' };
   const projs = [...S.projects].sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'es', { numeric: true }));
   if (v.proyecto && !projs.some(p => p.id === v.proyecto)) projs.push({ id: v.proyecto, numero: '', cliente: '(projecte tancat)' });
   const t = todayStr();
