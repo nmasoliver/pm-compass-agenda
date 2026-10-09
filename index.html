@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1724">
+<meta name="color-scheme" content="light dark">
+<title>PM Compass Agenda</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--ink:#14202e;--muted:#5d6b7c;--line:#dde3ec;--acc:#1f4e8c;--org:#e8892f;--ok:#1d7a46;--late:#b3261e;--chip:#e8edf4;--shadow:0 6px 20px rgba(15,23,36,.18)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1724;--card:#182233;--ink:#e6ecf4;--muted:#9aa8ba;--line:#2a374b;--acc:#8fb8ff;--org:#f2994a;--ok:#4cc38a;--late:#ff8a80;--chip:#223049;--shadow:0 6px 20px rgba(0,0,0,.5)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header img{width:32px;height:32px;border-radius:8px}
+header .t{flex:1;min-width:0}
+header h1{margin:0;font-size:17px;letter-spacing:.3px}
+header .s{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:18px;flex:none}
+.ib.spin span{display:inline-block;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+main{padding:6px 14px calc(env(safe-area-inset-bottom,0px) + 96px)}
+.grp{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 2px 6px}
+.grp.late{color:var(--late)}
+.it{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:7px 0}
+.it.late{border-color:var(--late)}
+.it.done{opacity:.55}
+.it.done .tt{text-decoration:line-through}
+.ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--muted);background:none;flex:none;margin-top:1px;display:grid;place-items:center;font-size:14px;padding:0}
+.it.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.bd{flex:1;min-width:0}
+.tt{font-weight:600;overflow-wrap:anywhere}
+.mt{font-size:13px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.mt b{color:var(--org);font-weight:600}
+.late .mt b{color:var(--late)}
+.pend{font-size:11px;color:var(--org)}
+.empty{color:var(--muted);text-align:center;padding:40px 10px}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:62px;height:62px;border-radius:50%;border:0;background:var(--org);color:#0f1724;font-size:34px;line-height:1;box-shadow:var(--shadow);z-index:6}
+.tog{display:block;margin:22px auto 0;background:none;border:1px solid var(--line);border-radius:99px;padding:8px 16px;color:var(--muted);font-size:14px}
+.bar{background:var(--chip);color:var(--muted);font-size:13px;border-radius:10px;padding:8px 12px;margin:10px 0}
+.bar.err{background:color-mix(in srgb,var(--late) 16%,transparent);color:var(--late)}
+/* full de formulari */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
+.sheet[hidden]{display:none}
+.pane{background:var(--card);width:100%;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px);box-shadow:var(--shadow)}
+.pane h2{margin:0 0 12px;font-size:18px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:16px}
+textarea{resize:vertical;min-height:70px}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chips button{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:5px 12px;font-size:13px}
+.sw{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:15px}
+.sw input{width:22px;height:22px}
+.acts{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:600}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--bg)}
+.btn.dan{color:var(--late);flex:0 0 auto}
+/* inici de sessió */
+.login{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;gap:14px}
+.login img{width:110px;height:110px;border-radius:24px}
+.login h1{margin:0;font-size:22px}
+.login p{margin:0;color:var(--muted);max-width:340px}
+.login .btn{flex:none;padding:13px 22px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);transform:translateX(-50%);background:#14202e;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:30;max-width:90vw;box-shadow:var(--shadow)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="sheet" id="sheet" hidden><div class="pane" id="pane"></div></div>
+<script>
+'use strict';
+/* ================= Configuració ================= */
+const CLIENT_ID = '0ad70c14-4c86-44a8-8904-b919ed9bfe6d';
+const AUTH = 'https://login.microsoftonline.com/consumers/oauth2/v2.0';
+const SCOPES = 'Files.ReadWrite offline_access User.Read';
+const GRAPH = 'https://graph.microsoft.com/v1.0';
+const MARKER = 'PM Compass - projectes.json';   // el crea el programa de l'ordinador a la carpeta de dades
+const REDIRECT = new URL('./', location.href).href.split('?')[0].split('#')[0];
+const LS = {
+  get: (k, d) => { try { const v = localStorage.getItem('pmc.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem('pmc.' + k, JSON.stringify(v)); } catch {} },
+  del: k => { try { localStorage.removeItem('pmc.' + k); } catch {} },
+};
+
+/* ================= Utilitats ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const dstr = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayStr = () => dstr(new Date());
+const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return dstr(d); };
+const daysFrom = s => /^\d{4}-\d{2}-\d{2}$/.test(s || '') ? Math.round((new Date(s + 'T12:00:00') - new Date(todayStr() + 'T12:00:00')) / 864e5) : null;
+const nowIso = () => new Date().toISOString();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const fmtDay = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' }); };
+const fmtShort = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('ca-ES', { weekday: 'short', day: 'numeric', month: 'short' }); };
+let toastT = null;
+function toast(msg) { let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); } t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2600); }
+
+/* ================= Inici de sessió (OAuth 2 + PKCE) ================= */
+const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const randStr = n => b64url(crypto.getRandomValues(new Uint8Array(n)));
+async function login(prompt) {
+  const verifier = randStr(48), state = randStr(16);
+  const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+  LS.set('pkce', { verifier, state });
+  const p = new URLSearchParams({ client_id: CLIENT_ID, response_type: 'code', redirect_uri: REDIRECT, scope: SCOPES, response_mode: 'query', code_challenge: challenge, code_challenge_method: 'S256', state });
+  if (prompt) p.set('prompt', prompt);
+  location.href = AUTH + '/authorize?' + p;
+}
+async function tokenRequest(params) {
+  const r = await fetch(AUTH + '/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ client_id: CLIENT_ID, scope: SCOPES, ...params }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.access_token) throw new Error(j.error_description || j.error || ('Error ' + r.status));
+  LS.set('tok', { access: j.access_token, refresh: j.refresh_token || LS.get('tok', {}).refresh, exp: Date.now() + (j.expires_in || 3600) * 1000 });
+}
+async function handleRedirect() {
+  const u = new URL(location.href);
+  const code = u.searchParams.get('code'), err = u.searchParams.get('error');
+  if (!code && !err) return null;
+  history.replaceState(null, '', REDIRECT);
+  if (err) return u.searchParams.get('error_description') || err;
+  const pk = LS.get('pkce', null); LS.del('pkce');
+  if (!pk || pk.state !== u.searchParams.get('state')) return 'La sessió no coincideix. Torna-ho a provar.';
+  try { await tokenRequest({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT, code_verifier: pk.verifier }); return null; }
+  catch (e) { return e.message; }
+}
+let refreshing = null;
+async function accessToken() {
+  const t = LS.get('tok', null);
+  if (!t) throw Object.assign(new Error('Cal iniciar sessió'), { login: true });
+  if (t.access && t.exp > Date.now() + 90e3) return t.access;
+  if (!t.refresh) throw Object.assign(new Error('Cal iniciar sessió'), { login: true });
+  refreshing ||= tokenRequest({ grant_type: 'refresh_token', refresh_token: t.refresh }).finally(() => { refreshing = null; });
+  try { await refreshing; return LS.get('tok').access; }
+  catch (e) { LS.del('tok'); throw Object.assign(new Error('La sessió ha caducat'), { login: true }); }
+}
+
+/* ================= OneDrive (Microsoft Graph) ================= */
+const encPath = p => String(p).split('/').filter(Boolean).map(encodeURIComponent).join('/');
+async function graph(path, opts = {}, retry = true) {
+  const tok = await accessToken();
+  const r = await fetch(path.startsWith('http') ? path : GRAPH + path, { ...opts, headers: { Authorization: 'Bearer ' + tok, ...(opts.headers || {}) } });
+  if (r.status === 401 && retry) { const t = LS.get('tok', {}); t.exp = 0; LS.set('tok', t); return graph(path, opts, false); }
+  return r;
+}
+async function download(item) {
+  const url = item['@microsoft.graph.downloadUrl'];
+  let r = url ? await fetch(url).catch(() => null) : null;
+  if (!r || !r.ok) r = await graph(`/me/drive/items/${item.id}/content`);
+  if (!r.ok) throw new Error('No s’ha pogut llegir ' + item.name);
+  return JSON.parse((await r.text()).replace(/^\uFEFF/, ''));
+}
+async function findFolder() {
+  const r = await graph(`/me/drive/root/search(q='${encodeURIComponent(MARKER.replace(/'/g, "''"))}')?$top=50`);
+  if (!r.ok) return null;
+  const j = await r.json();
+  const hit = (j.value || []).find(x => x.name === MARKER && x.parentReference && x.parentReference.path);
+  if (!hit) return null;
+  return decodeURIComponent(hit.parentReference.path.replace(/^\/drive\/root:?/, '')).replace(/^\/+/, '');
+}
+
+/* ================= Dades i sincronització ================= */
+const S = {
+  folder: LS.get('folder', ''),
+  notes: LS.get('notes', {}),        // id -> {d: dades, e: eTag}
+  outbox: LS.get('outbox', []),      // canvis pendents d'enviar (sense cobertura)
+  projects: LS.get('projects', []),
+  lastSync: LS.get('lastSync', null),
+  showDone: false, busy: false, error: '', user: LS.get('user', ''),
+};
+const save = () => { LS.set('notes', S.notes); LS.set('outbox', S.outbox); LS.set('projects', S.projects); LS.set('lastSync', S.lastSync); };
+const agendaPath = id => `/me/drive/root:/${encPath(S.folder + '/Agenda/' + id + '.json')}:`;
+
+async function flushOutbox() {
+  while (S.outbox.length) {
+    const op = S.outbox[0];
+    let r;
+    if (op.op === 'put') r = await graph(agendaPath(op.id) + '/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _id: op.id, ...op.doc }, null, 2) });
+    else r = await graph(agendaPath(op.id), { method: 'DELETE' });
+    if (!(r.ok || (op.op === 'del' && r.status === 404))) throw new Error('No s’ha pogut desar a OneDrive (' + r.status + ')');
+    if (op.op === 'put') { const j = await r.json().catch(() => ({})); if (S.notes[op.id]) S.notes[op.id].e = j.eTag || ''; }
+    S.outbox.shift(); save();
+  }
+}
+async function sync() {
+  if (S.busy) return;
+  S.busy = true; S.error = ''; render();
+  try {
+    if (!S.folder) {
+      const f = await findFolder();
+      if (f == null) throw Object.assign(new Error('No trobo la carpeta de dades a OneDrive.'), { folder: true });
+      S.folder = f; LS.set('folder', f);
+    }
+    if (!S.user) { const r = await graph('/me?$select=displayName,userPrincipalName'); if (r.ok) { const j = await r.json(); S.user = j.displayName || j.userPrincipalName || ''; LS.set('user', S.user); } }
+    await flushOutbox();
+    // agenda: llistem la carpeta i només baixem el que ha canviat
+    let url = `/me/drive/root:/${encPath(S.folder + '/Agenda')}:/children?$top=500`, items = [];
+    while (url) {
+      const r = await graph(url);
+      if (r.status === 404) break;
+      if (!r.ok) throw new Error('No s’ha pogut llegir l’agenda (' + r.status + ')');
+      const j = await r.json(); items = items.concat(j.value || []); url = j['@odata.nextLink'] || null;
+    }
+    const seen = new Set(), pendingIds = new Set(S.outbox.map(o => o.id));
+    const todo = items.filter(it => it.file && /\.json$/i.test(it.name)).filter(it => {
+      const id = it.name.replace(/\.json$/i, ''); seen.add(id);
+      return !pendingIds.has(id) && (!S.notes[id] || S.notes[id].e !== it.eTag);
+    });
+    for (let i = 0; i < todo.length; i += 8) {
+      await Promise.all(todo.slice(i, i + 8).map(async it => {
+        try { const j = await download(it); const id = (typeof j._id === 'string' && j._id) || it.name.replace(/\.json$/i, ''); delete j._id; S.notes[id] = { d: j, e: it.eTag }; } catch (e) { console.warn(e); }
+      }));
+    }
+    for (const id of Object.keys(S.notes)) if (!seen.has(id) && !pendingIds.has(id)) delete S.notes[id];
+    // projectes actius (per triar-ne un)
+    try {
+      const r = await graph(`/me/drive/root:/${encPath(S.folder + '/' + MARKER)}`);
+      if (r.ok) { const meta = await r.json(); const j = await download(meta); if (Array.isArray(j.projectes)) S.projects = j.projectes; }
+    } catch (e) { console.warn(e); }
+    S.lastSync = nowIso(); save();
+  } catch (e) {
+    if (e.login) { S.busy = false; showLogin(e.message); return; }
+    S.error = e.folder ? 'folder' : (navigator.onLine === false ? 'Sense connexió: els canvis es desaran quan tornis a tenir cobertura.' : e.message);
+  } finally { S.busy = false; render(); }
+}
+function queue(op) {
+  S.outbox = S.outbox.filter(o => o.id !== op.id); S.outbox.push(op); save(); render();
+  sync();
+}
+
+/* ================= Pantalles ================= */
+function showLogin(msg) {
+  $('#app').innerHTML = `<div class="login"><img src="icon-192.png" alt=""><h1>PM Compass Agenda</h1>
+    <p>Entra amb el teu compte de Microsoft (el del teu OneDrive) per veure i afegir notes a l’agenda.</p>
+    ${msg ? `<div class="bar err">${esc(msg)}</div>` : ''}
+    <button class="btn pri" id="bLogin">Inicia la sessió amb Microsoft</button></div>`;
+  $('#bLogin').onclick = () => login('select_account');
+}
+const isLate = n => { if (n.estat === 'revisada' || !n.data) return false; const d = daysFrom(n.data); if (d < 0) return true; if (d === 0 && n.alarma && n.hora) { const now = new Date(); return n.hora <= `${pad(now.getHours())}:${pad(now.getMinutes())}`; } return false; };
+const projName = id => { const p = S.projects.find(x => x.id === id); return p ? (p.cliente || p.numero) : ''; };
+function itemHtml(id, n) {
+  const late = isLate(n), done = n.estat === 'revisada', pend = S.outbox.some(o => o.id === id);
+  const meta = [n.hora ? `<b>${n.alarma ? '⏰ ' : ''}${esc(n.hora)}</b>` : (n.alarma ? '<b>⏰</b>' : ''), late && n.data !== todayStr() ? esc(fmtShort(n.data)) : '', esc(projName(n.proyecto)), esc((n.detall || '').split('\n')[0])].filter(Boolean).join(' · ');
+  return `<div class="it${late ? ' late' : ''}${done ? ' done' : ''}" data-id="${esc(id)}"><button class="ck" data-ck="${esc(id)}" aria-label="${done ? 'Tornar a pendent' : 'Marcar com a revisada'}">${done ? '✓' : ''}</button>
+    <div class="bd" data-ed="${esc(id)}"><div class="tt">${esc(n.titol || '(sense text)')}</div>${meta ? `<div class="mt">${meta}</div>` : ''}${pend ? '<div class="pend">● pendent d’enviar</div>' : ''}</div></div>`;
+}
+function render() {
+  if (!LS.get('tok', null)) return showLogin();
+  const list = Object.entries(S.notes).map(([id, x]) => [id, x.d]);
+  const pendents = list.filter(([, n]) => n.estat !== 'revisada');
+  const sortK = ([, n]) => (n.data || '9999') + ' ' + (n.hora || '99:99');
+  pendents.sort((a, b) => sortK(a).localeCompare(sortK(b)));
+  const today = todayStr(), groups = [];
+  const late = pendents.filter(([, n]) => isLate(n));
+  if (late.length) groups.push(['late', 'Endarrerides', late]);
+  const rest = pendents.filter(([, n]) => !isLate(n));
+  const byDay = new Map();
+  for (const e of rest) { const d = e[1].data || ''; if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(e); }
+  for (const [d, l] of byDay) groups.push(['', d === today ? 'Avui' : d === addDays(today, 1) ? 'Demà' : d ? fmtDay(d) : 'Sense data', l]);
+  let html = '';
+  if (S.error === 'folder') html += `<div class="bar err">No trobo la carpeta de dades a OneDrive. Obre el programa PM Compass a l’ordinador (crea un fitxer que m’ajuda a trobar-la) i torna-ho a provar en uns minuts, o escriu la ruta a ⚙.</div>`;
+  else if (S.error) html += `<div class="bar err">${esc(S.error)}</div>`;
+  if (S.outbox.length && !S.busy) html += `<div class="bar">${S.outbox.length} canvi${S.outbox.length === 1 ? '' : 's'} pendent${S.outbox.length === 1 ? '' : 's'} d’enviar a OneDrive.</div>`;
+  html += groups.length ? groups.map(([c, t, l]) => `<div class="grp ${c}">${esc(t)} · ${l.length}</div>${l.map(([id, n]) => itemHtml(id, n)).join('')}`).join('')
+    : (S.busy && !S.lastSync ? '<div class="empty">Carregant l’agenda…</div>' : '<div class="empty">No tens res pendent a l’agenda.<br>Prem + per afegir-hi una nota.</div>');
+  const done = list.filter(([, n]) => n.estat === 'revisada').sort((a, b) => String(b[1].revisada || b[1].actualitzat || '').localeCompare(String(a[1].revisada || a[1].actualitzat || '')));
+  if (done.length) {
+    html += `<button class="tog" id="tgDone">${S.showDone ? 'Amagar les revisades' : `Veure les revisades (${done.length})`}</button>`;
+    if (S.showDone) html += `<div class="grp">Revisades</div>${done.slice(0, 40).map(([id, n]) => itemHtml(id, n)).join('')}`;
+  }
+  const sub = S.busy ? 'Sincronitzant…' : S.lastSync ? 'Actualitzat ' + new Date(S.lastSync).toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+  $('#app').innerHTML = `<header><img src="icon-192.png" alt=""><div class="t"><h1>Agenda</h1><div class="s">${esc(sub)}</div></div>
+    <button class="ib${S.busy ? ' spin' : ''}" id="bSync" aria-label="Actualitzar"><span>⟳</span></button><button class="ib" id="bCfg" aria-label="Configuració">⚙</button></header>
+    <main>${html}</main><button class="fab" id="bAdd" aria-label="Nova nota">+</button>`;
+  $('#bSync').onclick = () => sync();
+  $('#bCfg').onclick = cfgSheet;
+  $('#bAdd').onclick = () => noteSheet(null);
+  const tg = $('#tgDone'); if (tg) tg.onclick = () => { S.showDone = !S.showDone; render(); };
+  document.querySelectorAll('[data-ck]').forEach(b => b.onclick = e => { e.stopPropagation(); toggleDone(b.dataset.ck); });
+  document.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => noteSheet(b.dataset.ed));
+}
+function toggleDone(id) {
+  const n = S.notes[id]?.d; if (!n) return;
+  const doc = { ...n, actualitzat: nowIso() };
+  if (n.estat === 'revisada') { doc.estat = 'pendent'; delete doc.revisada; } else { doc.estat = 'revisada'; doc.revisada = nowIso(); }
+  S.notes[id].d = doc; queue({ op: 'put', id, doc });
+  if (doc.estat === 'revisada') toast('Revisada ✓');
+}
+
+/* ================= Formularis ================= */
+function openSheet(html) { $('#pane').innerHTML = html; $('#sheet').hidden = false; }
+function closeSheet() { $('#sheet').hidden = true; $('#pane').innerHTML = ''; }
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+function nextMonday(s) { const d = new Date(s + 'T12:00:00'); const k = (8 - d.getDay()) % 7 || 7; return addDays(s, k); }
+function noteSheet(id) {
+  const ex = id ? S.notes[id]?.d : null;
+  const v = ex ? { ...ex } : { titol: '', detall: '', data: todayStr(), hora: '', alarma: true, proyecto: '' };
+  const projs = [...S.projects].sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'es', { numeric: true }));
+  if (v.proyecto && !projs.some(p => p.id === v.proyecto)) projs.push({ id: v.proyecto, numero: '', cliente: '(projecte tancat)' });
+  const t = todayStr();
+  openSheet(`<h2>${ex ? 'Editar nota' : 'Nova nota'}</h2>
+    <label for="fT">Què has de fer</label><input type="text" id="fT" maxlength="120" value="${esc(v.titol)}" placeholder="Ex.: Trucar a Joel per la data de FAT">
+    <div class="row"><div><label for="fD">Dia</label><input type="date" id="fD" value="${esc(v.data || t)}"></div>
+      <div><label for="fH">Hora (opcional)</label><input type="time" id="fH" value="${esc(v.hora || '')}"></div></div>
+    <div class="chips"><button type="button" data-d="${t}">Avui</button><button type="button" data-d="${addDays(t, 1)}">Demà</button><button type="button" data-d="${addDays(t, 2)}">Demà passat</button><button type="button" data-d="${nextMonday(t)}">Dilluns</button></div>
+    <label class="sw"><input type="checkbox" id="fA" ${v.alarma ? 'checked' : ''}> ⏰ Alarma al programa de l’ordinador</label>
+    <label for="fP">Projecte (opcional)</label><select id="fP"><option value="">— Sense projecte —</option>${projs.map(p => `<option value="${esc(p.id)}" ${p.id === v.proyecto ? 'selected' : ''}>${esc((p.numero ? p.numero + ' · ' : '') + (p.cliente || ''))}</option>`).join('')}</select>
+    <label for="fX">Detall (opcional)</label><textarea id="fX" rows="3">${esc(v.detall || '')}</textarea>
+    ${ex ? `<label class="sw"><input type="checkbox" id="fR" ${ex.estat === 'revisada' ? 'checked' : ''}> Revisada</label>` : ''}
+    <div class="acts">${ex ? '<button class="btn dan" id="bDel">Eliminar</button>' : ''}<button class="btn" id="bCan">Cancel·lar</button><button class="btn pri" id="bOk">${ex ? 'Desar' : 'Afegir'}</button></div>`);
+  document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { $('#fD').value = b.dataset.d; });
+  $('#bCan').onclick = closeSheet;
+  if (!ex) setTimeout(() => $('#fT').focus(), 50);
+  $('#bOk').onclick = () => {
+    const titol = $('#fT').value.trim();
+    if (!titol) { $('#fT').focus(); toast('Escriu què has de fer'); return; }
+    const data = $('#fD').value || t, hora = $('#fH').value || '';
+    const d = { titol, data, hora, alarma: $('#fA').checked, proyecto: $('#fP').value, detall: $('#fX').value.trim() };
+    let doc, nid = id;
+    if (ex) {
+      const estat = $('#fR').checked ? 'revisada' : 'pendent';
+      doc = { ...ex, ...d, estat, actualitzat: nowIso() };
+      if (estat === 'revisada' && !ex.revisada) doc.revisada = nowIso();
+      if (estat === 'pendent') delete doc.revisada;
+    } else { nid = uid(); doc = { ...d, estat: 'pendent', creat: nowIso(), actualitzat: nowIso(), origen: 'mòbil' }; }
+    S.notes[nid] = { d: doc, e: S.notes[nid]?.e || '' };
+    closeSheet(); queue({ op: 'put', id: nid, doc });
+    toast(ex ? 'Desat' : (d.alarma ? `Alarma per a ${fmtShort(data)}${hora ? ' · ' + hora : ''}` : 'Nota afegida'));
+  };
+  const del = $('#bDel');
+  if (del) del.onclick = () => { if (!confirm('S’esborrarà aquesta nota. No es pot desfer.')) return; delete S.notes[id]; closeSheet(); queue({ op: 'del', id }); toast('Eliminada'); };
+}
+function cfgSheet() {
+  openSheet(`<h2>Configuració</h2>
+    <label>Compte</label><div>${esc(S.user || '—')}</div>
+    <label for="cF">Carpeta de dades a OneDrive</label><input type="text" id="cF" value="${esc(S.folder)}" placeholder="Ex.: Documents/Seguiment de Projectes">
+    <div class="mt">És la carpeta on hi ha «Projectes», «Agenda», «Directori»… Si la deixes buida, la busco jo.</div>
+    <div class="acts"><button class="btn dan" id="bOut">Tancar la sessió</button><button class="btn" id="bCan">Cancel·lar</button><button class="btn pri" id="bOk">Desar</button></div>`);
+  $('#bCan').onclick = closeSheet;
+  $('#bOk').onclick = () => { const f = $('#cF').value.trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, ''); if (f !== S.folder) { S.folder = f; LS.set('folder', f); S.notes = {}; S.lastSync = null; save(); } closeSheet(); sync(); };
+  $('#bOut').onclick = () => { if (S.outbox.length && !confirm('Hi ha canvis pendents d’enviar que es perdran. Vols tancar la sessió igualment?')) return; ['tok', 'notes', 'outbox', 'projects', 'lastSync', 'user'].forEach(LS.del); location.reload(); };
+}
+
+/* ================= Arrencada ================= */
+(async () => {
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  const err = await handleRedirect();
+  if (err) return showLogin(err);
+  if (!LS.get('tok', null)) return showLogin();
+  render(); sync();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync(); });
+  window.addEventListener('online', () => sync());
+})();
+</script>
+</body>
+</html>
