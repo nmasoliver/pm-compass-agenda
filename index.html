@@ -553,7 +553,7 @@ function cfgSheet() {
     <label for="cF">Carpeta de dades a OneDrive</label><input type="text" id="cF" value="${esc(S.folder)}" placeholder="Ex.: Documents/Seguiment de Projectes">
     <div class="mt">És la carpeta on hi ha «Projectes», «Agenda», «Directori»… Si la deixes buida, la busco jo.</div>
     <label class="sw"><input type="checkbox" id="cC" ${S.calOn ? 'checked' : ''}> 📅 Posar les alarmes al calendari «PM Compass»</label>
-    <div class="mt">${S.calOn ? (hasCalScope() ? (S.calCount != null ? `${S.calCount} alarma${S.calCount === 1 ? '' : 'es'} al calendari.` : 'Actiu.') : 'Falta donar permís al calendari.') : 'Desactivat.'} Per veure-les i rebre’n els avisos al mòbil, afegeix el teu compte de Microsoft al Calendari de Samsung.</div>
+    <div class="mt">${S.calOn ? (hasCalScope() ? (S.calCount != null ? `${S.calCount} alarm${S.calCount === 1 ? 'a' : 'es'} al calendari.` : 'Actiu.') : 'Falta donar permís al calendari.') : 'Desactivat.'} Per veure-les i rebre’n els avisos al mòbil, afegeix el teu compte de Microsoft al Calendari de Samsung.</div>
     <div class="acts"><button class="btn dan" id="bOut">Tancar la sessió</button><button class="btn" id="bCan">Cancel·lar</button><button class="btn pri" id="bOk">Desar</button></div>`);
   $('#bCan').onclick = closeSheet;
   $('#bOk').onclick = () => { const c = $('#cC').checked; if (c !== S.calOn) { S.calOn = c; LS.set('calOn', c); }
