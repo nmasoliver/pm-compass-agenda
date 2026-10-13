@@ -130,7 +130,7 @@ textarea{resize:vertical;min-height:70px}
 /* ================= Configuració ================= */
 const CLIENT_ID = '0ad70c14-4c86-44a8-8904-b919ed9bfe6d';
 const AUTH = 'https://login.microsoftonline.com/consumers/oauth2/v2.0';
-const SCOPES = 'Files.ReadWrite offline_access User.Read';
+const SCOPES = 'Files.ReadWrite Calendars.ReadWrite offline_access User.Read';
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 const MARKER = 'PM Compass - projectes.json';   // el crea el programa de l'ordinador a la carpeta de dades
 const REDIRECT = new URL('./', location.href).href.split('?')[0].split('#')[0];
@@ -177,7 +177,7 @@ async function tokenRequest(params) {
   const r = await fetch(AUTH + '/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ client_id: CLIENT_ID, scope: SCOPES, ...params }) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok || !j.access_token) throw new Error(j.error_description || j.error || ('Error ' + r.status));
-  LS.set('tok', { access: j.access_token, refresh: j.refresh_token || LS.get('tok', {}).refresh, exp: Date.now() + (j.expires_in || 3600) * 1000 });
+  LS.set('tok', { access: j.access_token, refresh: j.refresh_token || LS.get('tok', {}).refresh, exp: Date.now() + (j.expires_in || 3600) * 1000, scope: j.scope || LS.get('tok', {}).scope || '' });
 }
 async function handleRedirect() {
   const u = new URL(location.href);
@@ -198,7 +198,7 @@ async function accessToken() {
   if (!t.refresh) throw Object.assign(new Error('Cal iniciar sessió'), { login: true });
   refreshing ||= tokenRequest({ grant_type: 'refresh_token', refresh_token: t.refresh }).finally(() => { refreshing = null; });
   try { await refreshing; return LS.get('tok').access; }
-  catch (e) { LS.del('tok'); throw Object.assign(new Error('La sessió ha caducat'), { login: true }); }
+  catch (e) { LS.del('tok'); throw Object.assign(new Error('Torna a iniciar la sessió (cal per renovar-la o per activar el calendari).'), { login: true }); }
 }
 
 /* ================= OneDrive (Microsoft Graph) ================= */
@@ -232,7 +232,7 @@ const S = {
   outbox: LS.get('outbox', []),      // canvis pendents d'enviar (sense cobertura)
   projects: LS.get('projects', []),
   lastSync: LS.get('lastSync', null),
-  showDone: false, busy: false, error: '', user: LS.get('user', ''),
+  showDone: false, busy: false, error: '', user: LS.get('user', ''), calOn: LS.get('calOn', true), calErr: '', calCount: LS.get('calCount', null),
   view: LS.get('view', 'llista'), date: todayStr(),
 };
 const save = () => { LS.set('notes', S.notes); LS.set('outbox', S.outbox); LS.set('projects', S.projects); LS.set('lastSync', S.lastSync); };
@@ -285,10 +285,77 @@ async function sync() {
       if (r.ok) { const meta = await r.json(); const j = await download(meta); if (Array.isArray(j.projectes)) S.projects = j.projectes; }
     } catch (e) { console.warn(e); }
     S.lastSync = nowIso(); save();
+    await calSync();
   } catch (e) {
     if (e.login) { S.busy = false; showLogin(e.message); return; }
     S.error = e.folder ? 'folder' : (navigator.onLine === false ? 'Sense connexió: els canvis es desaran quan tornis a tenir cobertura.' : e.message);
   } finally { S.busy = false; render(); }
+}
+/* ================= Calendari (Outlook.com del compte personal) ================= */
+const CAL_NAME = 'PM Compass';
+const PROP_ID = 'String {6b1f5a2e-3c4d-4e8f-9a1b-2c3d4e5f6a7b} Name pmcNoteId';
+const PROP_H = 'String {6b1f5a2e-3c4d-4e8f-9a1b-2c3d4e5f6a7b} Name pmcHash';
+const hasCalScope = () => /calendars\.readwrite/i.test(LS.get('tok', {}).scope || '');
+function evFor(id, n) {
+  const hora = n.hora || '08:00';
+  const start = new Date(`${n.data}T${hora}:00`), end = new Date(start.getTime() + 15 * 60000);
+  const p = S.projects.find(x => x.id === n.proyecto);
+  const body = [n.detall || '', p ? `Projecte: ${p.numero ? p.numero + ' · ' : ''}${p.cliente || ''}` : '', 'Nota de PM Compass'].filter(Boolean).join('\n');
+  const ev = {
+    subject: '⏰ ' + (n.titol || '(sense text)') + (p ? ` · ${p.cliente || p.numero}` : ''),
+    start: { dateTime: start.toISOString().slice(0, 19), timeZone: 'UTC' },
+    end: { dateTime: end.toISOString().slice(0, 19), timeZone: 'UTC' },
+    body: { contentType: 'text', content: body },
+    isReminderOn: true, reminderMinutesBeforeStart: 0, showAs: 'free',
+  };
+  const h = hashStr(JSON.stringify([ev.subject, ev.start.dateTime, ev.body.content]));
+  ev.singleValueExtendedProperties = [{ id: PROP_ID, value: id }, { id: PROP_H, value: h }];
+  return { ev, h };
+}
+function hashStr(t) { let a = 0x811c9dc5; for (let i = 0; i < t.length; i++) a = Math.imul(a ^ t.charCodeAt(i), 16777619); return (a >>> 0).toString(36); }
+async function calId() {
+  let id = LS.get('calId', '');
+  if (id) { const r = await graph(`/me/calendars/${id}?$select=id`); if (r.ok) return id; }
+  const r = await graph(`/me/calendars?$select=id,name&$top=100`);
+  if (!r.ok) throw new Error('No puc llegir els calendaris (' + r.status + ')');
+  const hit = ((await r.json()).value || []).find(c => c.name === CAL_NAME);
+  if (hit) id = hit.id;
+  else {
+    const c = await graph('/me/calendars', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: CAL_NAME, color: 'lightOrange' }) });
+    if (!c.ok) throw new Error('No he pogut crear el calendari (' + c.status + ')');
+    id = (await c.json()).id;
+  }
+  LS.set('calId', id); return id;
+}
+async function calSync() {
+  S.calErr = '';
+  if (!S.calOn || !hasCalScope()) return;
+  try {
+    const cid = await calId();
+    // cites existents creades per PM Compass
+    const exp = `$expand=singleValueExtendedProperties($filter=id eq '${PROP_ID}' or id eq '${PROP_H}')`;
+    let url = `/me/calendars/${cid}/events?$select=id&$top=200&${exp}`, have = {};
+    while (url) {
+      const r = await graph(url); if (!r.ok) throw new Error('No puc llegir el calendari (' + r.status + ')');
+      const j = await r.json();
+      for (const e of j.value || []) {
+        const pr = Object.fromEntries((e.singleValueExtendedProperties || []).map(x => [x.id.split(' Name ')[1], x.value]));
+        if (pr.pmcNoteId) { if (have[pr.pmcNoteId]) await graph(`/me/events/${e.id}`, { method: 'DELETE' }); else have[pr.pmcNoteId] = { id: e.id, h: pr.pmcHash || '' }; }
+      }
+      url = j['@odata.nextLink'] || null;
+    }
+    // què hi ha de ser: alarmes pendents d'avui endavant (i dels últims 2 dies)
+    const from = addDays(todayStr(), -2), want = {};
+    for (const [id, x] of Object.entries(S.notes)) { const n = x.d; if (n.alarma && n.estat !== 'revisada' && n.data && n.data >= from) want[id] = n; }
+    let n = 0;
+    for (const [id, note] of Object.entries(want)) {
+      const { ev, h } = evFor(id, note), cur = have[id];
+      if (!cur) { const r = await graph(`/me/calendars/${cid}/events`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ev) }); if (r.ok) n++; }
+      else if (cur.h !== h) { await graph(`/me/events/${cur.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ev) }); }
+    }
+    for (const [id, cur] of Object.entries(have)) if (!want[id]) await graph(`/me/events/${cur.id}`, { method: 'DELETE' });
+    S.calCount = Object.keys(want).length; LS.set('calCount', S.calCount);
+  } catch (e) { S.calErr = e.message || String(e); }
 }
 function queue(op) {
   S.outbox = S.outbox.filter(o => o.id !== op.id); S.outbox.push(op); save(); render();
@@ -392,6 +459,8 @@ function render() {
   if (S.error === 'folder') html += `<div class="bar err">No trobo la carpeta de dades a OneDrive. Obre el programa PM Compass a l’ordinador (crea un fitxer que m’ajuda a trobar-la) i torna-ho a provar en uns minuts, o escriu la ruta a ⚙.</div>`;
   else if (S.error) html += `<div class="bar err">${esc(S.error)}</div>`;
   if (S.outbox.length && !S.busy) html += `<div class="bar">${S.outbox.length} canvi${S.outbox.length === 1 ? '' : 's'} pendent${S.outbox.length === 1 ? '' : 's'} d’enviar a OneDrive.</div>`;
+  if (S.calOn && !hasCalScope()) html += `<div class="bar">📅 Per rebre les alarmes al calendari del mòbil cal donar permís al calendari. <button class="tog" style="margin:8px 0 0" id="bCalOk">Donar permís</button></div>`;
+  else if (S.calErr) html += `<div class="bar err">Calendari: ${esc(S.calErr)}</div>`;
   const due = list.filter(([, n]) => n.alarma && isLate(n)).length;
   if (due && v !== 'llista') html += `<button class="due" id="bDue">🔔 Tens ${due} alarm${due === 1 ? 'a' : 'es'} per revisar · Veure-les</button>`;
   let title = '';
@@ -411,6 +480,7 @@ function render() {
   $('#bAdd').onclick = () => noteSheet(null, { data: v === 'llista' ? todayStr() : (v === 'dia' ? d : (d >= todayStr() ? d : todayStr())) });
   const tg = $('#tgDone'); if (tg) tg.onclick = () => { S.showDone = !S.showDone; render(); };
   const bd = $('#bDue'); if (bd) bd.onclick = () => setView('llista');
+  const bc = $('#bCalOk'); if (bc) bc.onclick = () => login();
   document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
   document.querySelectorAll('[data-nav]').forEach(b => b.onclick = () => navDate(+b.dataset.nav));
   document.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { S.date = b.dataset.day; setView('dia'); });
@@ -482,10 +552,13 @@ function cfgSheet() {
     <label>Compte</label><div>${esc(S.user || '—')}</div>
     <label for="cF">Carpeta de dades a OneDrive</label><input type="text" id="cF" value="${esc(S.folder)}" placeholder="Ex.: Documents/Seguiment de Projectes">
     <div class="mt">És la carpeta on hi ha «Projectes», «Agenda», «Directori»… Si la deixes buida, la busco jo.</div>
+    <label class="sw"><input type="checkbox" id="cC" ${S.calOn ? 'checked' : ''}> 📅 Posar les alarmes al calendari «PM Compass»</label>
+    <div class="mt">${S.calOn ? (hasCalScope() ? (S.calCount != null ? `${S.calCount} alarma${S.calCount === 1 ? '' : 'es'} al calendari.` : 'Actiu.') : 'Falta donar permís al calendari.') : 'Desactivat.'} Per veure-les i rebre’n els avisos al mòbil, afegeix el teu compte de Microsoft al Calendari de Samsung.</div>
     <div class="acts"><button class="btn dan" id="bOut">Tancar la sessió</button><button class="btn" id="bCan">Cancel·lar</button><button class="btn pri" id="bOk">Desar</button></div>`);
   $('#bCan').onclick = closeSheet;
-  $('#bOk').onclick = () => { const f = $('#cF').value.trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, ''); if (f !== S.folder) { S.folder = f; LS.set('folder', f); S.notes = {}; S.lastSync = null; save(); } closeSheet(); sync(); };
-  $('#bOut').onclick = () => { if (S.outbox.length && !confirm('Hi ha canvis pendents d’enviar que es perdran. Vols tancar la sessió igualment?')) return; ['tok', 'notes', 'outbox', 'projects', 'lastSync', 'user'].forEach(LS.del); location.reload(); };
+  $('#bOk').onclick = () => { const c = $('#cC').checked; if (c !== S.calOn) { S.calOn = c; LS.set('calOn', c); }
+    const f = $('#cF').value.trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, ''); if (f !== S.folder) { S.folder = f; LS.set('folder', f); S.notes = {}; S.lastSync = null; save(); } closeSheet(); sync(); };
+  $('#bOut').onclick = () => { if (S.outbox.length && !confirm('Hi ha canvis pendents d’enviar que es perdran. Vols tancar la sessió igualment?')) return; ['tok', 'notes', 'outbox', 'projects', 'lastSync', 'user', 'calId', 'calCount'].forEach(LS.del); location.reload(); };
 }
 
 /* ================= Arrencada ================= */
